@@ -56,7 +56,7 @@ $ hyperfine --min-runs 3 --prepare 'cargo clean' 'cargo t'
 
 Breakdown: Clean compile ~1.4s, integration tests ~0.02s, doctests ~0.1s \[1\]
 
-## edition = "2024" and doctest = false
+### edition = "2024" and doctest = false
 
 ```
 $ hyperfine --min-runs 3 --prepare 'cargo clean' 'cargo t'
@@ -65,6 +65,47 @@ $ hyperfine --min-runs 3 --prepare 'cargo clean' 'cargo t'
 ```
 
 Breakdown: Clean compile ~1.4s, integration tests ~0.02s \[1\]
+
+## Results Windows
+
+### Setup
+
+```
+Windows 10
+rustc 1.82.0-nightly (2c93fabd9 2024-08-15)
+AMD Ryzen 9 5900X 12-Core Processor (Zen 3 micro-architecture)
+CPU boost enabled.
+```
+
+### edition = "2021"
+
+```
+$ hyperfine --min-runs 3 --prepare 'cargo clean' 'cargo t'
+  Time (mean ± σ):     55.053 s ±  1.733 s    [User: 103.338 s, System: 108.279 s]
+  Range (min … max):   53.398 s … 56.855 s    3 runs
+```
+
+Breakdown: Clean compile ~2.4s, integration tests ~0.08s, doctests ~51.3s \[1\]
+
+### edition = "2024"
+
+```
+$ hyperfine --min-runs 3 --prepare 'cargo clean' 'cargo t'
+  Time (mean ± σ):      7.107 s ±  0.015 s    [User: 7.170 s, System: 8.052 s]
+  Range (min … max):    7.097 s …  7.124 s    3 runs
+```
+
+Breakdown: Clean compile ~2.4s, integration tests ~0.08s, doctests ~2.3s \[1\]
+
+### edition = "2024" and doctest = false
+
+```
+$ hyperfine --min-runs 3 --prepare 'cargo clean' 'cargo t'
+  Time (mean ± σ):      2.575 s ±  0.066 s    [User: 2.920 s, System: 0.677 s]
+  Range (min … max):    2.518 s …  2.648 s    3 runs
+```
+
+Breakdown: Clean compile ~2.4s, integration tests ~0.08s \[1\]
 
 \[1\] Numbers as reported by cargo, in reality felt latency can be quite
 different, and very small numbers are inaccurate. E.g. the integration test
@@ -83,6 +124,11 @@ much of that is process startup and how much is compiling the doctests.
   discrepancies.
 - Given a sufficient quantity of doctests, iterative `cargo t` will become slow,
   no matter how little content is tested.
+- Windows is maybe not the best OS for software development.
+- Comparing `cargo t --test it` vs `cargo t --doc`, and assuming the doctest
+  build doesn't get cached, and that compiling the doctests takes a similar
+  amount of time as the integration test binary, we get a "run as individual
+  processes" overhead of ~1s on Linux and ~3s on Windows for 1k doc-tests.
 
 ## Repro
 
